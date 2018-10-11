@@ -16,6 +16,8 @@
 
 #include "header.h"
 
+#define sstmac_app_name cholesky
+
 int main(int argc, char** argv) {
   hclib::launch([argc, argv]() {
     int i, j, k, ii;
@@ -59,6 +61,7 @@ int main(int argc, char** argv) {
                 lkji[i][j][k] = new TileBlock;
             // Allocate memory for the tiles.
             lkji[i][j][0]->matrixBlock = new double*[tileSize];
+           #pragma sst compute
             for( ii = 0; ii < tileSize; ++ii )
                 lkji[i][j][0]->matrixBlock[ii] = new double[tileSize];
         }
@@ -74,13 +77,17 @@ int main(int argc, char** argv) {
         fscanf(in, "%lf\n", &A[i][j]);
     }
 
+
+  #pragma sst compute
     for( i = 0 ; i < numTiles ; ++i ) {
         for( j = 0 ; j <= i ; ++j ) {
             // Split the matrix into tiles and write it into the item space at time 0.
             // The tiles are indexed by tile indices (which are tag values).
             temp = lkji[i][j][0]->matrixBlock;
+          #pragma sst loop_count tileSize
             for( A_i = i*tileSize, T_i = 0 ; T_i < tileSize; ++A_i, ++T_i ) {
-                for( A_j = j*tileSize, T_j = 0 ; T_j < tileSize; ++A_j, ++T_j ) {
+             #pragma sst loop_count tileSize
+              for( A_j = j*tileSize, T_j = 0 ; T_j < tileSize; ++A_j, ++T_j ) {
                     temp[ T_i ][ T_j ] = A[ A_i ][ A_j ];
                 }
             }
@@ -97,6 +104,7 @@ int main(int argc, char** argv) {
 
         sequential_cholesky (k, tileSize, prevPivotTile, currPivotTile );
         // Taking this malloc out from triSolve method
+       #pragma sst compute
         for(int j = k + 1 ; j < numTiles ; ++j ) {
             TileBlock *currPivotColumnTile = lkji[j][k][k+1];
             currPivotColumnTile->matrixBlock = new double*[tileSize];
@@ -141,6 +149,7 @@ int main(int argc, char** argv) {
     printf("The computation took %f seconds\r\n",((b.tv_sec - a.tv_sec)*1000000+(b.tv_usec - a.tv_usec))*1.0/1000000);
 
     out = fopen("cholesky.out", "w");
+#pragma sst delete
     for ( i = 0; i < numTiles; ++i ) {
         for( i_b = 0; i_b < tileSize; ++i_b) {
             int k = 1;
@@ -159,7 +168,7 @@ int main(int argc, char** argv) {
             }
         }
     }
-
+#pragma sst delete
     for( i = 0; i < matrixSize; ++i ) delete[] A[i];
     delete[] A;
 
@@ -167,4 +176,5 @@ int main(int argc, char** argv) {
     fclose(in);
 
   });
+  return 0;
 }

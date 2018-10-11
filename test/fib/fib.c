@@ -201,6 +201,8 @@ void taskMain(void *raw_args) {
     assert(answer == fn);
 }
 
+#define sstmac_app_name fib
 int main(int argc, char ** argv) {
     hclib_launch(taskMain, argv);
+    return 0;
 }

@@ -1,4 +1,7 @@
+HCLIB_ROOT=$(HOME)/Programs/install/hclib/regular
 include $(HCLIB_ROOT)/include/hclib.mak
+
+CXX=g++
 
 EXE=cholesky
 

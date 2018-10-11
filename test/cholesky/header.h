@@ -27,11 +27,16 @@
 using namespace hclib;
 
 typedef struct TileBlock {
+#pragma sst null_variable replace 0
 	double **matrixBlock;
 } TileBlock;
 
+#pragma sst memoize inputs(tileSize) model(linear)
 void sequential_cholesky (int k, int tileSize, TileBlock* in_lkji_kkk, TileBlock* out_lkji_kkkp1);
+#pragma sst memoize inputs(tileSize) model(linear)
 void trisolve (int k, int j, int tileSize, TileBlock* in_lkji_jkk, TileBlock* in_lkji_kkkp1, TileBlock* out_lkji_jkkp1);
+#pragma sst memoize inputs(tileSize) model(linear)
 void update_diagonal (int k, int j, int i, int tileSize, TileBlock* in_lkji_jjk, TileBlock* in_lkji_jkkp1, TileBlock* out_lkji_jjkp1);
+#pragma sst memoize inputs(tileSize) model(linear)
 void update_nondiagonal (int k, int j, int i, int tileSize, TileBlock* in_lkji_jik, TileBlock* in_lkji_ikkp1, TileBlock* in_lkji_jkkp1, TileBlock* out_lkji_jikp1);
 

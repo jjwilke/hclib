@@ -2,8 +2,10 @@ TARGET := fib
 
 include $(HCLIB_ROOT)/include/hclib.mak
 
+CC=sstcc --memoize
+
 $(TARGET): $(TARGET).c
-	$(CC) $^ -o$@ -std=gnu11 $(PROJECT_CFLAGS) $(PROJECT_LDFLAGS) $(PROJECT_LDLIBS)
+	$(CC) $^ -o $@ -O0 -g $(PROJECT_CFLAGS) $(PROJECT_LDFLAGS) $(PROJECT_LDLIBS)
 
 WORKLOAD_ARGS ?= 5
 

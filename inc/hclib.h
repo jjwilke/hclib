@@ -57,6 +57,11 @@ struct _phased_t;
 // forward declaration for promise_st in hclib-promise.h
 struct hclib_promise_st;
 
+enum sst_state {
+ null_sst_state=0,
+ hpt_level
+};
+
 /**
  * @brief Spawn a new task asynchronously.
  * @param[in] fct_ptr           The function to execute

@@ -76,7 +76,8 @@ void set_current_worker(int wid) {
 }
 
 int get_current_worker() {
-    return ((hclib_worker_state *)pthread_getspecific(ws_key))->id;
+  void* val = pthread_getspecific(ws_key);
+  return ((hclib_worker_state *)val)->id;
 }
 
 static void set_curr_lite_ctx(LiteCtx *ctx) {
@@ -255,6 +256,7 @@ static inline void execute_task(hclib_task_t *task) {
 
     // task->_fp is of type 'void (*generic_frame_ptr)(void*)'
     LOG_DEBUG("execute_task: task=%p fp=%p\n", task, task->_fp);
+#pragma sst implicit_state hpt_level(task->steal_level)
     (task->_fp)(task->args);
     check_out_finish(current_finish);
     free(task);
@@ -374,6 +376,7 @@ void find_and_run_task(hclib_worker_state *ws) {
     if (!task) {
         while (hclib_context->done_flags[ws->id].flag) {
             // try to steal
+#pragma sst overhead steal_overhead
             task = hpt_steal_task(ws);
             if (task) {
 #ifdef HC_COMM_WORKER_STATS

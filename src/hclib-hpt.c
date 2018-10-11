@@ -58,7 +58,7 @@ hclib_task_t *hpt_steal_task(hclib_worker_state *ws) {
             hclib_task_t *buff = deque_steal(&(d->deque));
             if (buff) { /* steal succeeded */
                 ws->current = get_deque_place(ws, pl);
-
+                buff->steal_level = d->pl->level;
 #ifdef VERBOSE
                 printf("hpt_steal_task: worker %d successful steal from deque %p, pl %p, "
                        "level %d\n", ws->id, d, d->pl, d->pl->level);
@@ -224,7 +224,7 @@ int deque_push_place(hclib_worker_state *ws, place_t *pl, hclib_task_t *ele) {
     return deque_push(&deq->deque, ele);
 }
 
-inline hclib_task_t *deque_pop_place(hclib_worker_state *ws, place_t *pl) {
+hclib_task_t *deque_pop_place(hclib_worker_state *ws, place_t *pl) {
     hc_deque_t *deq = get_deque_place(ws, pl);
     return deque_pop(&deq->deque);
 }
@@ -232,7 +232,7 @@ inline hclib_task_t *deque_pop_place(hclib_worker_state *ws, place_t *pl) {
 /**
  * Initializes a hc_deque_t
  */
-inline void init_hc_deque_t(hc_deque_t *hcdeq, place_t *pl) {
+void init_hc_deque_t(hc_deque_t *hcdeq, place_t *pl) {
     hcdeq->deque.head = hcdeq->deque.tail = 0;
     hcdeq->pl = pl;
     hcdeq->ws = NULL;

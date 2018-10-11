@@ -25,7 +25,7 @@
 // #define OVERFLOW_PROTECT
 
 #define LITECTX_FREE(ptr) free(ptr)
-#define LITECTX_SIZE 0x40000 /* 256KB */
+#define LITECTX_SIZE 0x20000 /* 256KB */
 
 #ifdef OVERFLOW_PROTECT
 // This must be a multiple of the page size on this machine?
@@ -83,6 +83,8 @@ static inline void *LITECTX_ALLOC(size_t nbytes) {
 #endif
 
 static __inline__ LiteCtx *LiteCtx_create(void (*fn)(LiteCtx*)) {
+    static const int size = LITECTX_SIZE;
+#pragma sst stack alloc(size,sizeof(LiteCtx))
     LiteCtx *ctx = (LiteCtx *)LITECTX_ALLOC(LITECTX_SIZE);
     char *const stack_top = ctx->_stack + LITECTX_STACK_SIZE;
     ctx->prev = NULL;
@@ -111,6 +113,7 @@ static __inline__ void LiteCtx_destroy(LiteCtx *ctx) {
         exit(1);
     }
 #endif
+#pragma sst stack free(ctx)
     LITECTX_FREE(ctx);
 }
 

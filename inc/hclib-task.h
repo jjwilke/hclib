@@ -45,6 +45,7 @@ typedef struct hclib_task_t {
     int future_frontier; // index of next awaited future in list
     hclib_future_t **future_list; // Null terminated list
     place_t *place;
+    int steal_level;
     struct hclib_task_t *next_waiter;
 } hclib_task_t;
 
